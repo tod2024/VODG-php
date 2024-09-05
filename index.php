@@ -9,6 +9,7 @@ function convertToEpoch($date) {
     return strtotime($date);
 }
 
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_FILES['file']['tmp_name'])) {
     $contentType = $_POST['content_type'];
 
@@ -95,6 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                 case 'content_rating':
                     $xml->addChild('content_rating', $value);
                     break;
+                    case 'image format':
+                     // Add images
+                     $images = $xml->addChild('images');
+        $imageCategories = ['Hero Card', 'Logo', 'Poster', 'Tile', 'Title Block', 'Wallpaper', 'Hero Block'];
+        $formats = ['3:1', '', '2:3', '16:9', '4:3', '16:9', '3:4'];
+        foreach ($imageCategories as $index => $category) {
+            $image = $images->addChild('image', $mediaId.'_' . strtolower(str_replace(' ', '', $category)) . '.png');
+            $image->addAttribute('lang', 'en');
+            $image->addAttribute('category', $category);
+            $format = $formats[$index];
+            $image->addAttribute('format', !empty($format) ? $format : '.png');
+        }
+        break;
                 default:
                     // Handle other cases if needed
                     break;
