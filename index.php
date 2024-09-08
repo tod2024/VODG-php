@@ -1,157 +1,70 @@
-<?php
-require 'vendor/autoload.php'; // PhpSpreadsheet autoload
-
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Reader\Exception;
-
-// Function to convert date to Epoch time
-function convertToEpoch($date) {
-    return strtotime($date);
-}
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_FILES['file']['tmp_name'])) {
-    $contentType = $_POST['content_type'];
-
-    // Load the Excel file
-    $file = $_FILES['file']['tmp_name'];
-    try {
-        $spreadsheet = IOFactory::load($file);
-        $worksheet = $spreadsheet->getActiveSheet();
-    } catch (Exception $e) {
-        die("Error loading Excel file: " . $e->getMessage());
-    }
-
-    // Get the first row (header) and validate columns
-    $header = [];
-    foreach ($worksheet->getRowIterator() as $rowIndex => $row) {
-        if ($rowIndex == 1) { // First row is treated as a header
-            foreach ($worksheet->getColumnIterator() as $colIndex => $col) {
-                $header[$colIndex] = strtolower(trim($worksheet->getCell($colIndex . $rowIndex)->getValue()));
-            }
-            continue;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOD VOD Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+            margin: 20px;
         }
-
-        // Create XML structure for each movie
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><movie></movie>');
-
-        $mediaId = ''; // To store the Media ID for naming the XML file
-
-        // Iterate over the rest of the rows and create XML tags
-        foreach ($worksheet->getColumnIterator() as $colIndex => $col) {
-            $value = $worksheet->getCell($colIndex . $rowIndex)->getValue();
-            $headerName = $header[$colIndex];
-
-            // Map headers to appropriate XML tags
-            switch ($headerName) {
-                case 'ar title':
-                    $xml->addChild('title', $value)->addAttribute('lang', 'ar');
-                    break;
-                case 'en title':
-                    $xml->addChild('title', $value)->addAttribute('lang', 'en');
-                    break;
-                case 'media id':
-                    $mediaId = $value; // Store the media ID to name the file
-                    $xml->addChild('mediaid', $value);
-                    break;
-                case 'publish date':
-                    $xml->addChild('startVod', convertToEpoch($value));
-                    break;
-                case 'end date':
-                    $xml->addChild('endVod', convertToEpoch($value));
-                    break;
-                case 'exclusive start_date':
-                    if (!isset($exclusivity)) {
-                        $exclusivity = $xml->addChild('exclusivity');
-                    }
-                    $exclusivity->addChild('is_exclusive', '')->addAttribute('start_date', convertToEpoch($value));
-                    break;
-                case 'exclusive end_date':
-                    if (!isset($exclusivity)) {
-                        $exclusivity = $xml->addChild('exclusivity');
-                    }
-                    $exclusivity->addChild('is_exclusive', '')->addAttribute('end_date', convertToEpoch($value));
-                    break;
-                case 'duration':
-                    $xml->addChild('duration', $value);
-                    break;
-                case 'en synopsis':
-                    $xml->addChild('description', $value)->addAttribute('lang', 'en');
-                    break;
-                case 'ar synopsis':
-                    $xml->addChild('description', $value)->addAttribute('lang', 'ar');
-                    break;
-                case 'en category':
-                    $xml->addChild('category', $value)->addAttribute('lang', 'en');
-                    break;
-                case 'ar category':
-                    $xml->addChild('category', $value)->addAttribute('lang', 'ar');
-                    break;
-                case 'releaseyear':
-                    $xml->addChild('releaseYear', $value);
-                    break;
-                case 'rating':
-                    $xml->addChild('rating', $value);
-                    break;
-                case 'content_rating':
-                    $xml->addChild('content_rating', $value);
-                    break;
-                    case 'image format':
-                     // Add images
-                     $images = $xml->addChild('images');
-        $imageCategories = ['Hero Card', 'Logo', 'Poster', 'Tile', 'Title Block', 'Wallpaper', 'Hero Block'];
-        $formats = ['3:1', '', '2:3', '16:9', '4:3', '16:9', '3:4'];
-        foreach ($imageCategories as $index => $category) {
-            $image = $images->addChild('image', $mediaId.'_' . strtolower(str_replace(' ', '', $category)) . '.png');
-            $image->addAttribute('lang', 'en');
-            $image->addAttribute('category', $category);
-            $format = $formats[$index];
-            $image->addAttribute('format', !empty($format) ? $format : '.png');
+        h1 {
+            color: #4CAF50;
         }
-        break;
-                default:
-                    // Handle other cases if needed
-                    break;
-            }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 60%;
         }
-
-        // Check if Media ID is set, and use it for the filename
-        if (!empty($mediaId)) {
-            $filePath = "$mediaId.xml";
-            $xml->asXML($filePath);
-
-            echo "<h2>XML for Media ID: $mediaId Generated Successfully!</h2>";
-            echo "<a href='$filePath' download>Download $mediaId.xml</a><br><br>";
-        } else {
-            echo "<h2>Error: Media ID is missing for row $rowIndex. XML not generated.</h2><br>";
+        label {
+            font-size: 1.2em;
+            color: #333;
         }
-    }
-} else {
-    // Display UI for form input
-    ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TOD VOD Generator</title>
-    </head>
-    <body>
-        <h1>TOD VOD Generator</h1>
-        <form action="" method="POST" enctype="multipart/form-data">
-            <label for="content_type">Content Type:</label><br>
-            <input type="radio" id="movies" name="content_type" value="movies" checked>
-            <label for="movies">Entertainment - Movies</label><br>
-            <input type="radio" id="movies_trailers" name="content_type" value="movies_trailers">
-            <label for="movies_trailers">Entertainment - Movies + Trailers</label><br><br>
+        input[type="file"],
+        input[type="submit"],
+        input[type="radio"] {
+            margin: 10px 0;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .file-input {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TOD VOD Generator</h1>
+    <form action="generate_xml.php" method="POST" enctype="multipart/form-data">
+        <label for="content_type">Content Type:</label><br>
+        <input type="radio" id="movies" name="content_type" value="movies" checked>
+        <label for="movies">Entertainment - Movies</label><br>
+        <input type="radio" id="movies_trailers" name="content_type" value="movies_trailers">
+        <label for="movies_trailers">Entertainment - Movies + Trailers</label><br><br>
 
-            <label for="file">Upload Excel File:</label>
-            <input type="file" name="file" id="file" accept=".xlsx"><br><br>
+        <label for="file">Upload Excel File:</label><br>
+        <input type="file" name="file" id="file" class="file-input" accept=".xlsx"><br><br>
 
-            <input type="submit" value="Generate XML">
-        </form>
-    </body>
-    </html>
-    <?php
-}
-?>
+        <input type="submit" value="Generate XML">
+    </form>
+</body>
+</html>
