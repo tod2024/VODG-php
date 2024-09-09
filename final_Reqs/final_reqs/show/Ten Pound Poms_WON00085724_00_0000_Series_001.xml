@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<show id="G-XX-_E-TENPOUND_POUND_POMS">
+<title lang="en">Ten Pound Poms</title>
+<title lang="ar">هجرة إنجليزية</title>
+<description lang="en">In the biggest organized migration in the 20th century, one million British left everything for a new life in Australia for only 10 pounds.</description>
+<description lang="ar">في أكبر هجرة منظمة في القرن العشرين، ترك مليون بريطاني كل شيء من أجل حياة جديدة في أستراليا مقابل عشرة جنيهات فقط.</description>
+<category lang="en">Series,Adventure,Thriller,Drama</category>
+<category lang="ar">مسلسل,مغامرة,إثارة,دراما</category>
+<rating>6.80</rating>
+<seasons>
+<season id="1">
+<title lang="en">Ten Pound Poms S1</title>
+<title lang="ar">هجرة إنجليزية</title>
+<description lang="en">In the biggest organized migration in the 20th century, one million British left everything for a new life in Australia for only 10 pounds.</description>
+<description lang="ar">في أكبر هجرة منظمة في القرن العشرين، ترك مليون بريطاني كل شيء من أجل حياة جديدة في أستراليا مقابل عشرة جنيهات فقط.</description>
+<releaseYear>2023</releaseYear>
+</season>
+</seasons>
+<type>Entertainment</type>
+<images>
+<image lang="en" category="Hero Card" format="3:1">show-id_hero.png</image>
+<image lang="en" category="Logo" format="">show-id_logo.png</image>
+<image lang="en" category="Poster" format="2:3">show-id_poster.png</image>
+<image lang="en" category="Tile" format="16:9">show-id_tile.png</image>
+<image lang="en" category="Title Block" format="4:3">show-id_titleblock.png</image>
+<image lang="en" category="Wallpaper" format="16:9">show-id_wallpaper.png</image>
+<image lang="en" category="Hero Block" format="3:4">show-id_heroblock.png</image>
+</images>
+<content_ratings>
+<content_rating country_code="en">15+</content_rating>
+</content_ratings>
+<isKidsContent>false</isKidsContent>
+<credits lang="ar">
+<casts>
+<cast>
+<name>وارن براون;فاي مارساي</name>
+<character></character>
+</cast>
+</casts>
+<crews>
+<crew>
+<role>Director</role>
+<name>جيمي ماجنوس ستون</name>
+</crew>
+</crews>
+</credits>
+<credits lang="en">
+<casts>
+<cast>
+<name>Warren Brown;Faye Marsay</name>
+<character></character>
+</cast>
+</casts>
+<crews>
+<crew>
+<role>Director</role>
+<name>Jamie Magnus Stone</name>
+</crew>
+</crews>
+</credits>
+	<trailers>
+	<trailer>
+		<mediaid>show-id_TRL</mediaid>
+		<title lang="en">title - Trailer</title>
+		<title lang="ar">title - Trailer</title>
+		<startVod>1709240400</startVod>
+		<images>
+			<image format="16:9">show-id_TRL.Wallpaper.png</image>
+		</images>
+		<audio_tracks>
+		<audio_track format="stereo">en</audio_track>
+		</audio_tracks>
+		<package>FREE</package>
+	</trailer>
+</trailers>
+</show>

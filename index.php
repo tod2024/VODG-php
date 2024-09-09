@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,43 +8,50 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #fff;
             color: #333;
             text-align: center;
             margin: 20px;
         }
+
         h1 {
-            color: #4CAF50;
+            color: #ffbb00c3;
         }
+
         form {
-            background-color: #fff;
+            background-color: #ffbb00c3;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0);
             display: inline-block;
             width: 60%;
         }
+
         label {
             font-size: 1.2em;
             color: #333;
         }
+
         input[type="file"],
         input[type="submit"],
         input[type="radio"] {
             margin: 10px 0;
         }
+
         input[type="submit"] {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #ffbb00c3;
+            color: black;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 1em;
         }
+
         input[type="submit"]:hover {
             background-color: #45a049;
         }
+
         .file-input {
             padding: 10px;
             background-color: #f9f9f9;
@@ -52,6 +60,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>TOD VOD Generator</h1>
     <form action="generate_xml.php" method="POST" enctype="multipart/form-data">
@@ -67,4 +76,5 @@
         <input type="submit" value="Generate XML">
     </form>
 </body>
+
 </html>

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<movie>
+<title lang="en">The Equalizer</title>
+<title lang="ar">الانتقام</title>
+<description lang="en">When Robert MacCall knows a dangerous truth about his friends, he has to confront the mafia to protect them.</description>
+<description lang="ar">عندما يعرف روبرت ماكول حقيقة خطيرة عن أصدقائه في إيطاليا، يتعين عليه مواجهة المافيا لحمايتهم.</description>
+<mediaid>G-XX-_E-THEEQUALIZER__-2309071F4</mediaid>
+<category lang="en">Movie,Action,Thriller,Drama,Crime</category>
+<category lang="ar">فيلم,إثارة,دراما,جريمة,أكشن</category>
+<rating>6.80</rating>
+<startVod>1712707200</startVod>
+<endVod>1750377600</endVod>
+<releaseYear>2023</releaseYear>
+<type>Entertainment</type>
+<images>
+<image lang="en" category="Hero Card" format="3:1">media-id_hero.png</image>
+<image lang="en" category="Logo" format="">media-id_logo.png</image>
+<image lang="en" category="Poster" format="2:3">media-id_poster.png</image>
+<image lang="en" category="Tile" format="16:9">media-id_tile.png</image>
+<image lang="en" category="Title Block" format="4:3">media-id_titleblock.png</image>
+<image lang="en" category="Wallpaper" format="16:9">media-id_wallpaper.png</image>
+<image lang="en" category="Hero Block" format="3:4">media-id_heroblock.png</image>
+</images>
+<content_ratings>
+<content_rating country_code="en">18+</content_rating>
+</content_ratings>
+<isKidsContent>false</isKidsContent>
+<credits lang="ar">
+<casts>
+<cast>
+<name>أوجينيو ماستراندريا;داكوتا فانين;دنزل واشنطن</name>
+<character></character>
+</cast>
+</casts>
+<crews>
+<crew>
+<role>Director</role>
+<name>أنطوان فوكوا</name>
+</crew>
+</crews>
+</credits>
+<credits lang="en">
+<casts>
+<cast>
+<name>Denzel Washington;Dakota Fanning;Eugenio Mastrandrea</name>
+<character></character>
+</cast>
+</casts>
+<crews>
+<crew>
+<role>Director</role>
+<name>Antoine Fuqua</name>
+</crew>
+</crews>
+</credits>
+<audio_tracks>
+<audio_track format="Stereo">en</audio_track>
+</audio_tracks>
+<package>VOD</package>
+<trailers>
+	<trailer>
+		<mediaid>media-id_TRL</mediaid>
+		<title lang="en">title - Trailer</title>
+		<title lang="ar">title - Trailer</title>
+		<startVod>1709240400</startVod>
+		<images>
+			<image format="16:9">media-id_TRL.16_9.png</image>
+		</images>
+		<audio_tracks>
+		<audio_track format="stereo">en</audio_track>
+		</audio_tracks>
+		<package>FREE</package>
+	</trailer>
+</trailers>
+</movie>
