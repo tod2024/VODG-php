@@ -5,6 +5,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+
+
+
 // Function to convert date to Epoch time
 function convertToEpoch($date)
 {
@@ -34,7 +37,8 @@ function formatXml(SimpleXMLElement $xml)
     return $dom->saveXML();
 }
 
-function deleteGeneratedXmls() {
+function deleteGeneratedXmls()
+{
     $folderPath = 'generated_xmls'; // Replace with the actual path
 
     // Check if the folder exists
@@ -59,8 +63,29 @@ array_map('unlink', glob("generated_xmls/*.xml"));
 deleteGeneratedXmls();
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_FILES['file']['tmp_name'])) {
 
+
+    //define contet type text
+    $moviesOnly = 'Movie(s) Only';
+    $moviesTRL = 'Movie(s) With Trailers';
+    $showsOnly = 'Show(s) Only';
+    $showsTRL = 'Show(s) With Trailers';
+    $episodes = 'Episode(s)';
     //Get content type
     $contentType = $_POST['content_type'];
+
+
+    // define mediaID or showID based on content type
+    $iD = '';
+    $idTag = '';
+
+    if ($contentType ==  $moviesOnly || $contentType ==   $moviesTRL || $contentType ==  $episodes) {
+        $iD = 'media id';
+        $idTag = 'mediaid';
+    } elseif ($contentType ==  $showsOnly || $contentType ==  $showsTRL) {
+        $iD = 'show id';
+        $idTag = 'showid';
+    }
+
 
     // Load the Excel file
     $file = $_FILES['file']['tmp_name'];
@@ -104,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
     // Loop through the rows, skipping the first row (header)
     foreach ($worksheet->getRowIterator(2) as $row) {
         $rowIndex = $row->getRowIndex();
-        $mediaId = ''; // To store the media ID for naming the XML file
+        $contentId = ''; // To store the media ID for naming the XML file
         $enTitle = ''; // To store the EN title
         $arTitle = ''; // To store the AR title
         $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><movie></movie>');
@@ -120,14 +145,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
         $audioCounter = 0;
         $audioTracks = [];
         $packageValue = "VOD";
+        $LPSD = ''; // license product start date
+        $releaseDate = ''; //startVOD and license start date
+        $exclusiveEndDate = ''; //Exclusive End Date
+        $LPED = ''; // License Product End Date
+        $NumOfSeason = '';
+        $seasonTitleAR = '';
+        $seasonTitleEN = '';
+        $seasonDesAR = '';
+        $seasonDesEN = '';
+        $seasonReleaseYear = '';
 
-        // $c = 1;
+
+
         // Iterate through each column in the current row
         foreach ($columnIterator as $column) {
             $colIndex = $column->getColumnIndex();
             $value = $worksheet->getCell($colIndex . $rowIndex)->getValue();
             $headerName = $header[$colIndex];
 
+            // echo "headername:: $headerName<br>";
             // Map headers to appropriate XML tags
             switch ($headerName) {
                 case 'ar title':
@@ -139,83 +176,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                     $xml->addChild('title', htmlspecialchars($enTitle))->addAttribute('lang', 'en');
 
                     break;
-                case 'media id':
 
-                    $mediaId = trim($value); // Store media ID for naming the file
+                    //media ID Or Show ID
+                case $iD:
 
-                    $xml->addChild('mediaid', $mediaId);
+                    $contentId = trim($value); // Store media ID for naming the file
+
+                    $xml->addChild($idTag, $contentId);
                     break;
+
+
+                case 'release date':
+                    if (!empty($value)) {
+                        $releaseDate = convertToEpoch($value);
+                    }
+
+
+                    break;
+
+
                 case 'publish date':
                     if (!empty($value)) {
-                        $xml->addChild('startVod', convertToEpoch($value));
-                    } else {
-                        $xml->addChild('startVod');
+                        $releaseDate = convertToEpoch($value);
                     }
-
                     break;
+
+
+                case 'lpsd':
+
+                    if (!empty($value)) {
+
+                        $LPSD = convertToEpoch($value);
+                    }
+                    break;
+
                 case 'end date':
-                    if (!empty($value)) {
-                        $xml->addChild('endVod', convertToEpoch($value));
-                    } else {
-                        $xml->addChild('endVod');
-                    }
-                    break;
-                    //   need fix
-                case 'exclusive start_date':
 
-                    // Check if 'exclusivity' already exists in the XML
-                    if (!$xml->exclusivity) {
-                        // Create 'exclusivity' tag if it doesn't exist
-                        $exclusivity = $xml->addChild('exclusivity');
-                    } else {
-                        // If it exists, use the existing 'exclusivity' tag
-                        $exclusivity = $xml->exclusivity;
-                    }
-
-                    // Check if 'is_exclusive' already exists inside 'exclusivity'
-                    if (!$exclusivity->is_exclusive) {
-                        // Add 'is_exclusive' if it doesn't exist
-                        $isExclusive = $exclusivity->addChild('is_exclusive');
-                    } else {
-                        // Use the existing 'is_exclusive' tag
-                        $isExclusive = $exclusivity->is_exclusive;
-                    }
                     if (!empty($value)) {
-                        $isExclusive->addAttribute('start_date', convertToEpoch($value));
-                    } else {
-                        $isExclusive->addAttribute('start_date', '');
+
+                        $LPED = convertToEpoch($value);
                     }
                     break;
 
-                    //   need fix
-                case 'exclusive end_date':
 
-                    /// Check if 'exclusivity' already exists in the XML
-                    if (!$xml->exclusivity) {
-                        // Create 'exclusivity' tag if it doesn't exist
-                        $exclusivity = $xml->addChild('exclusivity');
-                    } else {
-                        // If it exists, use the existing 'exclusivity' tag
-                        $exclusivity = $xml->exclusivity;
-                    }
-
-                    // Check if 'is_exclusive' already exists inside 'exclusivity'
-                    if (!$exclusivity->is_exclusive) {
-                        // Add 'is_exclusive' if it doesn't exist
-                        $isExclusive = $exclusivity->addChild('is_exclusive');
-                    } else {
-                        // Use the existing 'is_exclusive' tag
-                        $isExclusive = $exclusivity->is_exclusive;
-                    }
+                case 'exclusive end date':
 
                     if (!empty($value)) {
-
-                        $afterconV = convertToEpoch($value);
-
-                        $isExclusive->addAttribute('end_date', $afterconV);
-                    } else {
-                        $isExclusive->addAttribute('end_date', '');
+                        $exclusiveEndDate = convertToEpoch($value);
                     }
+
                     break;
 
                 case 'duration':
@@ -233,6 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                 case 'en category':
                     $xml->addChild('category', $value)->addAttribute('lang', 'en');
                     break;
+
                 case 'ar category':
                     $xml->addChild('category', $value)->addAttribute('lang', 'ar');
                     break;
@@ -243,6 +253,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
                 case 'ar cast':
                     $castAR = ucfirst($value);
+                    break;
+
+                case 'season':
+
+                    if (!empty($value)) {
+                        $NumOfSeason = $value;
+
+                        if ($contentType == $episodes) {
+
+                            $xml->addChild('season')->addAttribute('id', $value);
+                        }
+                    }
+                    break;
+
+                case 'episode':
+
+                    if ($contentType == $episodes) {
+
+                        $xml->addChild('episodeNumber', $value);
+                    }
+                    break;
+
+                case 'show id':
+
+                    if ($contentType == $episodes) {
+
+                        $xml->addChild('show')->addAttribute('id', $value);
+                    }
+                    break;
+
+                case 'ar season title':
+
+                    if (!empty($value)) {
+
+                        $seasonTitleAR = $value;
+                    }
+                    break;
+
+                case 'en season title':
+
+                    if (!empty($value)) {
+
+                        $seasonTitleEN = $value;
+                    }
+                    break;
+
+                case 'ar season description':
+
+                    if (!empty($value)) {
+
+                        $seasonDesAR = $value;
+                    }
+                    break;
+
+                case 'en season description':
+
+                    if (!empty($value)) {
+
+                        $seasonDesEN = $value;
+                    }
+                    break;
+
+                case 'season release year':
+
+                    if (!empty($value)) {
+
+                        $seasonReleaseYear = $value;
+                    }
                     break;
 
                 case 'releaseyear':
@@ -277,38 +355,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
                 case 'image format':
                     $imageEXT = !empty($value) ? $value : 'png';
+                    
                     // Add images section
                     $images = $xml->addChild('images');
+                    if ($contentType != $episodes) {
+                        $imageCategoriesAndFormats = [
+                            'Hero Card'    => '3:1',
+                            'Logo'         => '',
+                            'Poster'       => '2:3',
+                            'Tile'         => '16:9',
+                            // 'Title Block'  => '4:3',
+                            'Wallpaper'    => '16:9',
+                            'Hero Block'   => '3:4',
+                            // 'Square Title' => '1:1',
+                            // 'Tall Image'   => '1:2',
+                            'Thumbnail'    => '16:9',
+                        ];
 
-                    $imageCategoriesAndFormats = [
-                        'Hero Card'    => '3:1',
-                        'Logo'         => '',
-                        'Poster'       => '2:3',
-                        'Tile'         => '16:9',
-                        // 'Title Block'  => '4:3',
-                        'Wallpaper'    => '16:9',
-                        'Hero Block'   => '3:4',
-                        // 'Square Title' => '1:1',
-                        // 'Tall Image'   => '1:2',
-                        'Thumbnail'    => '16:9',
-                    ];
+                        foreach ($imageCategoriesAndFormats as $category => $format) {
+                            if ($category == "Thumbnail") {
+                                $image = $images->addChild('image', $contentId . '_' . "TILE" . ".$imageEXT");
+                            } else {
+                                $image = $images->addChild('image', $contentId . '_' . Strtoupper(strtolower(str_replace(' ', '', $category))) . ".$imageEXT");
+                            }
 
-                    foreach ($imageCategoriesAndFormats as $category => $format) {
-                        if ($category == "Thumbnail") {
-                            $image = $images->addChild('image', $mediaId . '_' . "TILE" . ".$imageEXT");
-                        } else {
-                            $image = $images->addChild('image', $mediaId . '_' . Strtoupper(strtolower(str_replace(' ', '', $category))) . ".$imageEXT");
+                            $image->addAttribute('lang', 'en');
+                            $image->addAttribute('category', $category);
+                            $image->addAttribute('format', $format);
+
+                            // !empty($formats[$index]) ? $formats[$index] : '.png'
                         }
+                    } else {
+
+                        $image = $images->addChild('image', $contentId . '_' . Strtoupper(strtolower(str_replace(' ', '', 'Wallpaper'))) . ".$imageEXT");
 
                         $image->addAttribute('lang', 'en');
-                        $image->addAttribute('category', $category);
-                        $image->addAttribute('format', $format);
-
-                        // !empty($formats[$index]) ? $formats[$index] : '.png'
+                        $image->addAttribute('category', 'Wallpaper');
+                        $image->addAttribute('format', '16:9');
                     }
+
                     break;
 
-                case 'trailer image format';
+                case 'trailer image format':
                     if (!empty($value)) {
                         $imageFormatTRL = $value;
                     } else {
@@ -316,14 +404,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                     }
                     break;
 
-                case 'trailer publish date';
+                case 'trailer publish date':
                     $startVodTRL = convertToEpoch($value);
                     break;
                 default:
                     break;
+
+
+                case 'start_of_intro':
+                    $xml->addChild('start_of_intro', $value);
+                    break;
+
+                case 'end_of_intro':
+                    $xml->addChild('end_of_intro', $value);
+                    break;
+
+                case 'start_of_credits':
+                    $xml->addChild('start_of_credits', $value);
+                    break;
             }
 
-            // Map headers to appropriate XML tags
+
+            // Map headers to appropriate XML tags with contains condition 
             switch (true) {
 
                     //adding cast and crew tags
@@ -352,9 +454,111 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
             }
         }
 
+        //IF content type contains Shows
+        if ($contentType == $showsOnly || $contentType == $showsTRL) {
+            $seasons = $xml->addChild('seasons');
+            $season = $seasons->addChild('season');
+            $season->addAttribute('season', $NumOfSeason);
+
+            if (!empty($seasonTitleEN)) {
+                $seasonenTitle = trim(htmlspecialchars($seasonTitleEN));
+                $season->addChild('title', htmlspecialchars($seasonenTitle))->addAttribute('lang', 'en');
+            }
+            if (!empty($seasonTitleEN)) {
+                $seasonarTitle = trim(htmlspecialchars($seasonTitleAR));
+                $season->addChild('title', htmlspecialchars($seasonarTitle))->addAttribute('lang', 'ar');
+            }
+
+            if (!empty($seasonDesEN)) {
+                $enDes = trim(htmlspecialchars($seasonDesEN));
+
+                $season->addChild('description', htmlspecialchars($enDes))->addAttribute('lang', 'en');
+            }
+
+            if (!empty($seasonDesAR)) {
+                $arDes = trim(htmlspecialchars($seasonDesAR));
+                $season->addChild('description', htmlspecialchars($arDes))->addAttribute('lang', 'ar');
+            }
+
+            $season->addChild('releaseYear', $seasonReleaseYear);
+        }
+
+
+        //Create startVod
+        $xml->addChild('startVod', $releaseDate);
+        //Create endVod
+        $xml->addChild('endVod', $LPED);
+
         //add package tag
         $xml->addChild('package', $packageValue);
 
+        if ($contentType != $episodes) {
+
+            //Create ondemand_rights tag
+            $ondemandRights = $xml->addChild('ondemand_rights');
+            //Create ondemand_right tag
+            $ondemandRight = $ondemandRights->addChild('ondemand_rights');
+            if (!empty($LPSD)) {
+                $ondemandRight->addAttribute('start_date', $LPSD);
+            } else {
+                $ondemandRight->addAttribute('start_date', '');
+            }
+
+            if (!empty($LPED)) {
+                $ondemandRight->addAttribute('end_date', $LPED);
+            } else {
+                $ondemandRight->addAttribute('end_date', '');
+            }
+
+            $ondemandRight->addAttribute('blackoutStartDate', '');
+            $ondemandRight->addAttribute('blackoutEndDate', '');
+
+            //Create channel_groups tag
+            $channelGroups = $ondemandRights->addChild('channel_groups');
+            //Create channel_group tag
+            $channelGroups->addChild('channel_group', 'TOD');
+
+            //Create region_groups tag
+            $regionGroups = $ondemandRights->addChild('region_groups');
+            //Create region_group tag
+            $regionGroups->addChild('region_group', 'MENA');
+
+
+
+            //Handle exclusive start date
+            // Check if 'exclusivity' already exists in the XML
+            if (!$xml->exclusivity) {
+                // Create 'exclusivity' tag if it doesn't exist
+                $exclusivity = $xml->addChild('exclusivity');
+            } else {
+                // If it exists, use the existing 'exclusivity' tag
+                $exclusivity = $xml->exclusivity;
+            }
+
+            // Check if 'is_exclusive' already exists inside 'exclusivity'
+            if (!$exclusivity->is_exclusive) {
+                // Add 'is_exclusive' if it doesn't exist
+                $isExclusive = $exclusivity->addChild('is_exclusive');
+            } else {
+                // Use the existing 'is_exclusive' tag
+                $isExclusive = $exclusivity->is_exclusive;
+            }
+
+
+            if (!empty($releaseDate)) {
+                $isExclusive->addAttribute('start_date', $releaseDate);
+            } else {
+                $isExclusive->addAttribute('start_date', '');
+            }
+
+
+            if (!empty($exclusiveEndDate)) {
+
+                $isExclusive->addAttribute('end_date', $exclusiveEndDate);
+            } else {
+                $isExclusive->addAttribute('end_date', '');
+            }
+        }
 
         //initializing  credits en
         if (sizeof($crewEN) > 0 || !empty($castEN)) {
@@ -409,16 +613,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
             }
         }
         //IF content type is with trailer
-        if ($contentType == 'movies_trailers') {
+        if ($contentType == $moviesTRL || $contentType == $showsTRL) {
             $trailers = $xml->addChild('trailers');
             $trailer = $trailers->addChild('trailer');
-            $trailer->addChild('mediaid', $mediaId . "_TRL");
+            $trailer->addChild($idTag, $contentId . "_TRL");
             $trailer->addChild('title', "$arTitle - Trailer")->addAttribute('lang', 'ar');
             $trailer->addChild('title', "$enTitle - Trailer")->addAttribute('lang', 'en');
             $trailer->addChild('startVod', $startVodTRL);
             $trailer->addChild('package', 'FREE');
             $imagesTRL = $trailer->addChild('images');
-            $imageTRL = $imagesTRL->addChild('image', $mediaId . "_WALLPAPER." . $imageFormatTRL);
+            $imageTRL = $imagesTRL->addChild('image', $contentId . "_WALLPAPER." . $imageFormatTRL);
             $imageTRL->addAttribute('lang', 'en');
             $imageTRL->addAttribute('category', "Trailer");
             $imageTRL->addAttribute('format', "16:9");
@@ -433,18 +637,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
         $formattedXmlContent = formatXml($xml);
         // If Media ID is present and the row is not the first (header) row, save the XML file
-        if (!empty($mediaId)) {
+        if (!empty($contentId)) {
 
             $xmlPassedCounter++;
-            $filePath = "generated_xmls/$mediaId.xml";
+            $filePath = "generated_xmls/$contentId.xml";
             // $xml->asXML($filePath);
             file_put_contents($filePath, $formattedXmlContent);
-            $zip->addFile($filePath, "$mediaId.xml");
+            $zip->addFile($filePath, "$contentId.xml");
         } else {
             $xmlFailedCounter++;
             echo "<h2>Error: Media ID is missing for row $rowIndex. XML not generated.</h2><br>";
         }
     }
+
+
 
     // Close the ZIP archive
     $zip->close();
@@ -567,6 +773,8 @@ margin-right: 10px;
     echo "</div>";
     echo "</body>";
     echo "</html>";
+
+    $contentType = "";
 } else {
     header("Location: index.php");
 }
