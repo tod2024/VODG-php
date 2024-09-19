@@ -77,13 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
     // define mediaID or showID based on content type
     $iD = '';
     $idTag = '';
+    $firstTag = '';
 
     if ($contentType ==  $moviesOnly || $contentType ==   $moviesTRL || $contentType ==  $episodes) {
         $iD = 'media id';
         $idTag = 'mediaid';
+        $firstTag = strtolower(explode('(', $contentType)[0]);
     } elseif ($contentType ==  $showsOnly || $contentType ==  $showsTRL) {
         $iD = 'show id';
         $idTag = 'showid';
+        $firstTag = strtolower(explode('(', $contentType)[0]);
     }
 
 
@@ -132,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
         $contentId = ''; // To store the media ID for naming the XML file
         $enTitle = ''; // To store the EN title
         $arTitle = ''; // To store the AR title
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><movie></movie>');
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><' . $firstTag . '></' . $firstTag . '>');
         $imageFormatTRL = "";
         $startVodTRL = "";
         // Cast and crew variables
@@ -143,7 +146,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
         $crewAR = array();
         $crewARTXT = "ar crew";
         $audioCounter = 0;
+        $audioTRLCounter = 0;
         $audioTracks = [];
+        $audioTRLTracks = [];
         $packageValue = "VOD";
         $LPSD = ''; // license product start date
         $releaseDate = ''; //startVOD and license start date
@@ -166,7 +171,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
             // echo "headername:: $headerName<br>";
             // Map headers to appropriate XML tags
+
             switch ($headerName) {
+
                 case 'ar title':
                     $arTitle = trim(htmlspecialchars($value));
                     $xml->addChild('title', htmlspecialchars($arTitle))->addAttribute('lang', 'ar');
@@ -355,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
                 case 'image format':
                     $imageEXT = !empty($value) ? $value : 'png';
-                    
+
                     // Add images section
                     $images = $xml->addChild('images');
                     if ($contentType != $episodes) {
@@ -445,9 +452,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                     break;
 
                     //identifying who many Audio the content has
-                case (strpos($headerName, 'audio_') !== false):
+
+
+                case (str_starts_with($headerName, 'audio_')):
                     $audioTracks[$audioCounter] = $value;
                     $audioCounter++;
+                    break;
+
+                    //identifying who many Audio the content has
+                case (strpos($headerName, 'trailer audio_', 0) !== false):
+                    $audioTRLTracks[$audioTRLCounter] = $value;
+                    $audioTRLCounter++;
                     break;
                 default:
                     break;
@@ -612,11 +627,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                 $aduioTrackXML->addAttribute('format', 'Stereo');
             }
         }
+
+
         //IF content type is with trailer
         if ($contentType == $moviesTRL || $contentType == $showsTRL) {
             $trailers = $xml->addChild('trailers');
             $trailer = $trailers->addChild('trailer');
-            $trailer->addChild($idTag, $contentId . "_TRL");
+            $trailer->addChild('mediaid', $contentId . "_TRL");
             $trailer->addChild('title', "$arTitle - Trailer")->addAttribute('lang', 'ar');
             $trailer->addChild('title', "$enTitle - Trailer")->addAttribute('lang', 'en');
             $trailer->addChild('startVod', $startVodTRL);
@@ -626,9 +643,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
             $imageTRL->addAttribute('lang', 'en');
             $imageTRL->addAttribute('category', "Trailer");
             $imageTRL->addAttribute('format', "16:9");
-            if (sizeof($audioTracks) > 0) {
+            if ($contentType != $showsTRL && sizeof($audioTRLTracks) > 0) {
+
                 $audioTracksXMLTRL = $trailer->addChild('audio_tracks');
                 foreach ($audioTracks as $trackTRL) {
+                    $aduioTrackXMLTRL = $audioTracksXMLTRL->addChild('audio_track', $trackTRL);
+                    $aduioTrackXMLTRL->addAttribute('format', 'Stereo');
+                }
+            } elseif ($contentType == $showsTRL && sizeof($audioTRLTracks) > 0) {
+                $audioTracksXMLTRL = $trailer->addChild('audio_tracks');
+                foreach ($audioTRLTracks as $trackTRL) {
                     $aduioTrackXMLTRL = $audioTracksXMLTRL->addChild('audio_track', $trackTRL);
                     $aduioTrackXMLTRL->addAttribute('format', 'Stereo');
                 }

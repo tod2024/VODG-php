@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<show>
+  <showid>G-XX-_E-TENPOUND_POUND_POMS</showid>
+  <title lang="ar">هجرة إنجليزية</title>
+  <title lang="en">Ten Pound Poms</title>
+  <description lang="en">In the biggest organised migration in the 20th century, one million British left everything for a new life in Australia for only 10 pounds.</description>
+  <description lang="ar">في أكبر هجرة منظمة في القرن العشرين، ترك مليون بريطاني كل شيء من أجل حياة جديدة في أستراليا مقابل عشرة جنيهات فقط.</description>
+  <category lang="en">Series,Adventure,Thriller,Drama</category>
+  <category lang="ar">مسلسل,مغامرة,إثارة,دراما</category>
+  <rating>6.80</rating>
+  <content_ratings>
+    <content_rating country_code="en">15+</content_rating>
+  </content_ratings>
+  <type>Entertainment</type>
+  <isKidsContent>False</isKidsContent>
+  <images>
+    <image lang="en" category="Hero Card" format="3:1">G-XX-_E-TENPOUND_POUND_POMS_HEROCARD.png</image>
+    <image lang="en" category="Logo" format="">G-XX-_E-TENPOUND_POUND_POMS_LOGO.png</image>
+    <image lang="en" category="Poster" format="2:3">G-XX-_E-TENPOUND_POUND_POMS_POSTER.png</image>
+    <image lang="en" category="Tile" format="16:9">G-XX-_E-TENPOUND_POUND_POMS_TILE.png</image>
+    <image lang="en" category="Wallpaper" format="16:9">G-XX-_E-TENPOUND_POUND_POMS_WALLPAPER.png</image>
+    <image lang="en" category="Hero Block" format="3:4">G-XX-_E-TENPOUND_POUND_POMS_HEROBLOCK.png</image>
+    <image lang="en" category="Thumbnail" format="16:9">G-XX-_E-TENPOUND_POUND_POMS_TILE.png</image>
+  </images>
+  <seasons>
+    <season season="1">
+      <title lang="en">Ten Pound Poms S1</title>
+      <title lang="ar">هجرة إنجليزية</title>
+      <description lang="en">In the biggest organised migration in the 20th century, one million British left everything for a new life in Australia for only 10 pounds.</description>
+      <description lang="ar">في أكبر هجرة منظمة في القرن العشرين، ترك مليون بريطاني كل شيء من أجل حياة جديدة في أستراليا مقابل عشرة جنيهات فقط.</description>
+      <releaseYear>2023</releaseYear>
+    </season>
+  </seasons>
+  <startVod/>
+  <endVod/>
+  <package>VOD</package>
+  <ondemand_rights>
+    <ondemand_rights start_date="" end_date="" blackoutStartDate="" blackoutEndDate=""/>
+    <channel_groups>
+      <channel_group>TOD</channel_group>
+    </channel_groups>
+    <region_groups>
+      <region_group>MENA</region_group>
+    </region_groups>
+  </ondemand_rights>
+  <exclusivity>
+    <is_exclusive start_date="" end_date=""/>
+  </exclusivity>
+  <credits lang="en">
+    <casts>
+      <cast>
+        <name>Warren Brown;Faye Marsay</name>
+      </cast>
+    </casts>
+    <crews>
+      <crew>
+        <role>Director</role>
+        <name>Jamie Magnus Stone</name>
+      </crew>
+    </crews>
+  </credits>
+  <credits lang="ar">
+    <casts>
+      <cast>
+        <name>وارن براون;فاي مارساي</name>
+      </cast>
+    </casts>
+    <crews>
+      <crew>
+        <role>Director</role>
+        <name>جيمي ماجنوس ستون</name>
+      </crew>
+    </crews>
+  </credits>
+  <audio_tracks>
+    <audio_track format="Stereo">alaa</audio_track>
+    <audio_track format="Stereo">alaa</audio_track>
+  </audio_tracks>
+  <trailers>
+    <trailer>
+      <mediaid>G-XX-_E-TENPOUND_POUND_POMS_TRL</mediaid>
+      <title lang="ar">هجرة إنجليزية - Trailer</title>
+      <title lang="en">Ten Pound Poms - Trailer</title>
+      <startVod>1691010000</startVod>
+      <package>FREE</package>
+      <images>
+        <image lang="en" category="Trailer" format="16:9">G-XX-_E-TENPOUND_POUND_POMS_WALLPAPER.png</image>
+      </images>
+      <audio_tracks>
+        <audio_track format="Stereo">Tr</audio_track>
+        <audio_track format="Stereo">en</audio_track>
+      </audio_tracks>
+    </trailer>
+  </trailers>
+</show>
