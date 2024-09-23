@@ -189,7 +189,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
                     $contentId = trim($value); // Store media ID for naming the file
 
-                    $xml->addChild($idTag, $contentId);
+
+
+                    if ($contentType == $showsOnly || $contentType == $showsTRL) {
+                        $xml->addAttribute('id', $contentId);
+                    } else {
+                        $xml->addChild($idTag, $contentId);
+                    }
                     break;
 
 
@@ -214,6 +220,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
                     if (!empty($value)) {
 
                         $LPSD = convertToEpoch($value);
+                    }
+                    break;
+
+                case 'lped':
+
+                    if (!empty($value)) {
+
+                        $LPED = convertToEpoch($value);
                     }
                     break;
 
@@ -455,15 +469,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
 
 
                 case (str_starts_with($headerName, 'audio_')):
+                    if ($contentType !== $showsOnly || $contentType !== $showsTRL) {
+                        $audioTRLTracks[$audioTRLCounter] = $value;
+                        $audioTRLCounter++;
+                    }
+
                     $audioTracks[$audioCounter] = $value;
                     $audioCounter++;
                     break;
 
                     //identifying who many Audio the content has
                 case (strpos($headerName, 'trailer audio_', 0) !== false):
+
                     $audioTRLTracks[$audioTRLCounter] = $value;
                     $audioTRLCounter++;
                     break;
+
                 default:
                     break;
             }
@@ -498,82 +519,82 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file']) && !empty($_F
             $season->addChild('releaseYear', $seasonReleaseYear);
         }
 
-
-        //Create startVod
-        $xml->addChild('startVod', $releaseDate);
-        //Create endVod
-        $xml->addChild('endVod', $LPED);
-
+        if ($contentType != $showsOnly || $contentType != $showsTRL) {
+            //Create startVod
+            $xml->addChild('startVod', $releaseDate);
+            //Create endVod
+            $xml->addChild('endVod', $LPED);
+        }
         //add package tag
         $xml->addChild('package', $packageValue);
 
-        if ($contentType != $episodes) {
-
-            //Create ondemand_rights tag
-            $ondemandRights = $xml->addChild('ondemand_rights');
-            //Create ondemand_right tag
-            $ondemandRight = $ondemandRights->addChild('ondemand_rights');
-            if (!empty($LPSD)) {
-                $ondemandRight->addAttribute('start_date', $LPSD);
-            } else {
-                $ondemandRight->addAttribute('start_date', '');
-            }
-
-            if (!empty($LPED)) {
-                $ondemandRight->addAttribute('end_date', $LPED);
-            } else {
-                $ondemandRight->addAttribute('end_date', '');
-            }
-
-            $ondemandRight->addAttribute('blackoutStartDate', '');
-            $ondemandRight->addAttribute('blackoutEndDate', '');
-
-            //Create channel_groups tag
-            $channelGroups = $ondemandRights->addChild('channel_groups');
-            //Create channel_group tag
-            $channelGroups->addChild('channel_group', 'TOD');
-
-            //Create region_groups tag
-            $regionGroups = $ondemandRights->addChild('region_groups');
-            //Create region_group tag
-            $regionGroups->addChild('region_group', 'MENA');
 
 
-
-            //Handle exclusive start date
-            // Check if 'exclusivity' already exists in the XML
-            if (!$xml->exclusivity) {
-                // Create 'exclusivity' tag if it doesn't exist
-                $exclusivity = $xml->addChild('exclusivity');
-            } else {
-                // If it exists, use the existing 'exclusivity' tag
-                $exclusivity = $xml->exclusivity;
-            }
-
-            // Check if 'is_exclusive' already exists inside 'exclusivity'
-            if (!$exclusivity->is_exclusive) {
-                // Add 'is_exclusive' if it doesn't exist
-                $isExclusive = $exclusivity->addChild('is_exclusive');
-            } else {
-                // Use the existing 'is_exclusive' tag
-                $isExclusive = $exclusivity->is_exclusive;
-            }
-
-
-            if (!empty($releaseDate)) {
-                $isExclusive->addAttribute('start_date', $releaseDate);
-            } else {
-                $isExclusive->addAttribute('start_date', '');
-            }
-
-
-            if (!empty($exclusiveEndDate)) {
-
-                $isExclusive->addAttribute('end_date', $exclusiveEndDate);
-            } else {
-                $isExclusive->addAttribute('end_date', '');
-            }
+        //Create ondemand_rights tag
+        $ondemandRights = $xml->addChild('ondemand_rights');
+        //Create ondemand_right tag
+        $ondemandRight = $ondemandRights->addChild('ondemand_right');
+        if (!empty($LPSD)) {
+            $ondemandRight->addAttribute('start_date', $LPSD);
+        } else {
+            $ondemandRight->addAttribute('start_date', '');
         }
+
+        if (!empty($LPED)) {
+            $ondemandRight->addAttribute('end_date', $LPED);
+        } else {
+            $ondemandRight->addAttribute('end_date', '');
+        }
+
+        $ondemandRight->addAttribute('blackoutStartDate', '');
+        $ondemandRight->addAttribute('blackoutEndDate', '');
+
+        //Create channel_groups tag
+        $channelGroups = $ondemandRight->addChild('channel_groups');
+        //Create channel_group tag
+        $channelGroups->addChild('channel_group', 'TOD');
+
+        //Create region_groups tag
+        $regionGroups = $ondemandRight->addChild('region_groups');
+        //Create region_group tag
+        $regionGroups->addChild('region_group', 'MENA');
+
+
+
+        //Handle exclusive start date
+        // Check if 'exclusivity' already exists in the XML
+        if (!$xml->exclusivity) {
+            // Create 'exclusivity' tag if it doesn't exist
+            $exclusivity = $xml->addChild('exclusivity');
+        } else {
+            // If it exists, use the existing 'exclusivity' tag
+            $exclusivity = $xml->exclusivity;
+        }
+
+        // Check if 'is_exclusive' already exists inside 'exclusivity'
+        if (!$exclusivity->is_exclusive) {
+            // Add 'is_exclusive' if it doesn't exist
+            $isExclusive = $exclusivity->addChild('is_exclusive');
+        } else {
+            // Use the existing 'is_exclusive' tag
+            $isExclusive = $exclusivity->is_exclusive;
+        }
+
+
+        if (!empty($releaseDate)) {
+            $isExclusive->addAttribute('start_date', $releaseDate);
+        } else {
+            $isExclusive->addAttribute('start_date', '');
+        }
+
+
+        if (!empty($exclusiveEndDate)) {
+
+            $isExclusive->addAttribute('end_date', $exclusiveEndDate);
+        } else {
+            $isExclusive->addAttribute('end_date', '');
+        }
+
 
         //initializing  credits en
         if (sizeof($crewEN) > 0 || !empty($castEN)) {
